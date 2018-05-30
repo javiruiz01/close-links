@@ -1,6 +1,8 @@
 % Práctica 2: Programación ISO-Prolog
 :-module(_,_).
 
+% Ejemplo: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d,a)], X).
+
 alumno_prode(lopez, merlin, jaime, t110296).
 alumno_prode(copado, redondo, sergio, t110040).
 alumno_prode(calle, ruiz, javier, v130126).
@@ -23,7 +25,7 @@ recorrerLista(ListaSinRepeticiones, ListaPorRecorrrer, ListaCerrada) :-
     cogerElemento(ListaPorRecorrrer, Eslabon, NuevaListaPorRecorrer),
     sacarElemento(Eslabon, ListaSinRepeticiones, ListaSinElemento),
 
-    buscarListaCerrada(Eslabon, ListaSinElemento, Salida),
+    conectarPrimerEslabon(Eslabon, ListaSinElemento, Salida),
 
     recorrerLista(ListaSinRepeticiones, NuevaListaPorRecorrer, ListaCerrada).
 
@@ -34,13 +36,19 @@ cogerElemento([eslabon(A, B) | T], Eslabon, Salida) :-
 sacarElemento(eslabon(A,B), Lista, NuevaLista) :-
     delete(Lista, eslabon(A,B), NuevaLista).
 
-buscarListaCerrada(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
-    isMember([A, B], [As, Bs]).
+conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
+    puedeConectar([A, B], [As, Bs], Cabeza, Siguiente).
+    buscarListaCerrada().
 
-buscarListaCerrada(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
-    \+ isMember([A, B], [As, Bs]).
+conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
+    \+ puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
+    conectarPrimerEslabon(eslabon(A, B), T, Salida).
 
-isMember(List1, [As, Bs]) :-
-    member(As, List1).
-isMember(List1, [As, Bs]) :-
-    member(Bs, List1).
+puedeConectar([A, B], List, Cabeza, Siguiente) :-
+    member(A, List),
+    delete(List, A, [Siguiente | _]),
+    B = Cabeza.
+puedeConectar([A, B], List, Cabeza, Siguiente) :-
+    member(B, List),
+    delete(List, B, [Siguiente | _]),
+    A = Cabeza.
