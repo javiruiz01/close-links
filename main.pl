@@ -11,7 +11,7 @@ cierre(ListaSinRepeticiones, ListaCerrada):- %cierre/2
     comprobarListaSinRepeticiones(ListaSinRepeticiones),
     recorrerLista(ListaSinRepeticiones, ListaSinRepeticiones, ListaCerrada).
 
-comprobarListaSinRepeticiones([]).
+comprobarListaSinRepeticiones([]) :- !.
 comprobarListaSinRepeticiones([X | T]):-
     comprobarRepetidos(X, T),
     comprobarListaSinRepeticiones(T).
@@ -25,7 +25,7 @@ recorrerLista(ListaSinRepeticiones, ListaPorRecorrrer, ListaCerrada) :-
     cogerElemento(ListaPorRecorrrer, Eslabon, NuevaListaPorRecorrer),
     sacarElemento(Eslabon, ListaSinRepeticiones, ListaSinElemento),
 
-    conectarPrimerEslabon(Eslabon, ListaSinElemento, Salida),
+    conectarPrimerEslabon(Eslabon, ListaSinElemento, Salida, ListaCerrada),
 
     recorrerLista(ListaSinRepeticiones, NuevaListaPorRecorrer, ListaCerrada).
 
@@ -36,29 +36,32 @@ cogerElemento([eslabon(A, B) | T], Eslabon, Salida) :-
 sacarElemento(eslabon(A,B), Lista, NuevaLista) :-
     delete(Lista, eslabon(A,B), NuevaLista).
 
-conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Acc) :-
+conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
     puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
     append([eslabon(A, B)], [eslabon(As, Bs)], Acc),
-    buscarListaCerrada(Cabeza, Siguiente, T, Acc).
-conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
+    buscarListaCerrada(Cabeza, Siguiente, T, Acc, ListaCerrada).
+conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida, ListaCerrada) :-
     \+ puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
-    conectarPrimerEslabon(eslabon(A, B), T, Salida).
+    conectarPrimerEslabon(eslabon(A, B), T, Salida, ListaCerrada).
 
-buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc) :-
+buscarListaCerrada(Cabeza, Siguiente, [], Acc, ListaCerrada).
+buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc, ListaCerrada) :-
     conectarSiguiente(Siguiente, [A, B], NewSiguiente),
     append(Acc, [eslabon(A, B)], NewAcc),
-    comprobarCierre(Cabeza, NewSiguiente).
-buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc) :-
+    comprobarCierre(Cabeza, NewSiguiente, NewAcc, ListaCerrada),
+    buscarListaCerrada(Cabeza, NewSiguiente, T, NewAcc, ListaCerrada).
+buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc, ListaCerrada) :-
     \+ conectarSiguiente(Siguiente, [A, B], NewSiguiente),
-    buscarListaCerrada(Cabeza, Siguiente, T).
+    buscarListaCerrada(Cabeza, Siguiente, T, Acc, ListaCerrada).
 
 conectarSiguiente(Siguiente, List, NewSiguiente) :-
     member(Siguiente, List),
     delete(List, Siguiente, [NewSiguiente | _]).
 
-comprobarCierre(Cabeza, Siguiente) :-
-    Cabeza == Siguiente.
-comprobarCierre(Cabeza, Siguiente) :-
+comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada) :-
+    Cabeza == Siguiente,
+    Acc = ListaCerrada.
+comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada) :-
     Cabeza \= Siguiente.
 
 puedeConectar([A, B], List, Cabeza, Siguiente) :-
