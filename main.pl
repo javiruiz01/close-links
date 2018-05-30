@@ -36,13 +36,30 @@ cogerElemento([eslabon(A, B) | T], Eslabon, Salida) :-
 sacarElemento(eslabon(A,B), Lista, NuevaLista) :-
     delete(Lista, eslabon(A,B), NuevaLista).
 
-conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
-    puedeConectar([A, B], [As, Bs], Cabeza, Siguiente).
-    buscarListaCerrada().
-
+conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Acc) :-
+    puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
+    append([eslabon(A, B)], [eslabon(As, Bs)], Acc),
+    buscarListaCerrada(Cabeza, Siguiente, T, Acc).
 conectarPrimerEslabon(eslabon(A, B), [eslabon(As, Bs) | T], Salida) :-
     \+ puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
     conectarPrimerEslabon(eslabon(A, B), T, Salida).
+
+buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc) :-
+    conectarSiguiente(Siguiente, [A, B], NewSiguiente),
+    append(Acc, [eslabon(A, B)], NewAcc),
+    comprobarCierre(Cabeza, NewSiguiente).
+buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc) :-
+    \+ conectarSiguiente(Siguiente, [A, B], NewSiguiente),
+    buscarListaCerrada(Cabeza, Siguiente, T).
+
+conectarSiguiente(Siguiente, List, NewSiguiente) :-
+    member(Siguiente, List),
+    delete(List, Siguiente, [NewSiguiente | _]).
+
+comprobarCierre(Cabeza, Siguiente) :-
+    Cabeza == Siguiente.
+comprobarCierre(Cabeza, Siguiente) :-
+    Cabeza \= Siguiente.
 
 puedeConectar([A, B], List, Cabeza, Siguiente) :-
     member(A, List),

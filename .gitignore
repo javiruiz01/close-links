@@ -37,7 +37,7 @@ Temporary Items
 .history
 
 # Prolog stuff
-.itf
-.po
+*.itf
+*.po
 
 # End of https://www.gitignore.io/api/macos,visualstudiocode
