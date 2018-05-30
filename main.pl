@@ -48,7 +48,7 @@ buscarListaCerrada(Cabeza, Siguiente, [], Acc, ListaCerrada).
 buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc, ListaCerrada) :-
     conectarSiguiente(Siguiente, [A, B], NewSiguiente),
     append(Acc, [eslabon(A, B)], NewAcc),
-    comprobarCierre(Cabeza, NewSiguiente, NewAcc, ListaCerrada),
+    comprobarCierre(Cabeza, NewSiguiente, NewAcc, ListaCerrada, UpdateAcc),
     buscarListaCerrada(Cabeza, NewSiguiente, T, NewAcc, ListaCerrada).
 buscarListaCerrada(Cabeza, Siguiente, [eslabon(A, B) | T], Acc, ListaCerrada) :-
     \+ conectarSiguiente(Siguiente, [A, B], NewSiguiente),
@@ -58,11 +58,17 @@ conectarSiguiente(Siguiente, List, NewSiguiente) :-
     member(Siguiente, List),
     delete(List, Siguiente, [NewSiguiente | _]).
 
-comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada) :-
+comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada, UpdateAcc) :-
     Cabeza == Siguiente,
-    Acc = ListaCerrada.
-comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada) :-
-    Cabeza \= Siguiente.
+    Acc = ListaCerrada,
+    quitarUltimo(Acc, UpdateAcc).
+comprobarCierre(Cabeza, Siguiente, Acc, ListaCerrada, UpdateAcc) :-
+    Cabeza \= Siguiente,
+    Acc = UpdateAcc.
+
+quitarUltimo([_], []).
+quitarUltimo([X | Xs], [X | QuitarUltimo]) :-
+    quitarUltimo(Xs, QuitarUltimo).
 
 puedeConectar([A, B], List, Cabeza, Siguiente) :-
     member(A, List),
