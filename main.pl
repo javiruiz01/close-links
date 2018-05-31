@@ -1,7 +1,8 @@
 % Práctica 2: Programación ISO-Prolog
 :-module(_,_).
 
-% Ejemplo: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d,a)], X).
+% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d,a)], X).
+% Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabona, e], X).
 
 alumno_prode(lopez, merlin, jaime, t110296).
 alumno_prode(copado, redondo, sergio, t110040).
@@ -21,6 +22,7 @@ comprobarRepetidos(eslabon(As, Bs), [eslabon(A, B) | T]):-
     eslabon(As, Bs) \= eslabon(B, A),
     comprobarRepetidos(eslabon(As, Bs), T).
 
+recorrerLista(_, [], ListaCerrada).
 recorrerLista(ListaSinRepeticiones, ListaPorRecorrrer, ListaCerrada) :-
     cogerElemento(ListaPorRecorrrer, Eslabon, NuevaListaPorRecorrer),
     sacarElemento(Eslabon, ListaSinRepeticiones, ListaSinElemento),
