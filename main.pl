@@ -1,62 +1,63 @@
 % Práctica 2: Programación ISO-Prolog
 :-module(_,_).
 
-% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d,a)], X).
-% Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], X).
+% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,a)], X).
+% Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], X).
+% Ejemplo 3: cierreMinimo([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], Min).
+% Ejemplo 4: cierreMinimo([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Min).
 
 alumno_prode(lopez, merlin, jaime, t110296).
 alumno_prode(copado, redondo, sergio, t110040).
 alumno_prode(calle, ruiz, javier, v130126).
 
 cierre(ListaSinRepeticiones, ListaCerrada):- %cierre/2
-    comprobarListaSinRepeticiones(ListaSinRepeticiones),
-    recorrerLista(ListaSinRepeticiones, ListaSinRepeticiones, ListaCerrada).
+    iniciar(ListaSinRepeticiones, ListaSinRepeticiones, ListaCerrada).
 
-comprobarListaSinRepeticiones([]) :- !.
-comprobarListaSinRepeticiones([X | T]):-
-    comprobarRepetidos(X, T),
-    comprobarListaSinRepeticiones(T).
+iniciar(_, [], _).
+iniciar(_, _, ListaCerrada) :-
+    ground(ListaCerrada).
+iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
+    member(eslabon(A, B), RecorrerLista),
+    delete(ListaSinRepeticiones, eslabon(A, B), ListaSinBase),
+    delete(RecorrerLista, eslabon(A,B), RecorrerResto),
+    buscar(A, B, ListaSinBase, [eslabon(A, B)], ListaCerrada),
+    iniciar(ListaSinRepeticiones, RecorrerResto, ListaCerrada).
 
-comprobarRepetidos(_, []).
-comprobarRepetidos(eslabon(As, Bs), [eslabon(A, B) | T]):-
-    eslabon(As, Bs) \= eslabon(B, A),
-    comprobarRepetidos(eslabon(As, Bs), T).
+buscar(A, B, [], Acc, ListaCerrada) :-
+    A == B,
+    !,
+    Acc = ListaCerrada.
+buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+    member(B, [As, Bs]),
+    delete([As, Bs], B, [Siguiente | _]),
+    append(Acc, [eslabon(As, Bs)], NewAcc),
+    buscar(A, Siguiente, T, NewAcc, ListaCerrada).
+buscar(B, A, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+    member(B, [As, Bs]),
+    delete([As, Bs], B, [Siguiente | _]),
+    append(Acc, [eslabon(As, Bs)], NewAcc),
+    buscar(A, Siguiente, T, NewAcc, ListaCerrada).
+buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+    A == B,
+    !,
+    Acc = ListaCerrada.
+buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+    \+ member(B, [As, Bs]),
+    buscar(A, B, T, Acc, ListaCerrada).
 
-recorrerLista(_, [], ListaCerrada).
-recorrerLista(ListaSinRepeticiones, ListaPorRecorrrer, ListaCerrada) :-
-    cogerElemento(ListaPorRecorrrer, Eslabon, NuevaListaPorRecorrer),
-    sacarElemento(Eslabon, ListaSinRepeticiones, ListaSinElemento),
+cierreMinimo(OriginalList, Min) :-
+    findall(X, cierre(OriginalList, X), Result),
+    findMin(Result, Min).
 
-    conectarPrimerEslabon(ListaSinElemento, Eslabon, ListaSinElemento, Salida, ListaCerrada),
-
-    recorrerLista(ListaSinRepeticiones, NuevaListaPorRecorrer, ListaCerrada).
-
-cogerElemento([eslabon(A, B) | T], Eslabon, Salida) :-
-    eslabon(A, B) = Eslabon,
-    T = Salida.
-
-sacarElemento(eslabon(A,B), Lista, NuevaLista) :-
-    delete(Lista, eslabon(A,B), NuevaLista).
-
-conectarPrimerEslabon(ListaSinBase, eslabon(A, B), [eslabon(As, Bs) | T], Salida, ListaCerrada) :-
-    puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
-    append([eslabon(A, B)], [eslabon(As, Bs)], Acc),
-    sacarElemento(ListaSinBase, eslabon(As, Bs), ListaSinBaseNiConectado),
-    buscarListaCerrada(ListaSinBaseNiConectado, Cabeza, Siguiente, T, Acc, ListaCerrada),
-
-    conectarPrimerEslabon(ListaSinBase, eslabon(A, B), T, Salida, ListaCerrada).
-conectarPrimerEslabon(ListaSinBase, eslabon(A, B), [eslabon(As, Bs) | T], Salida, ListaCerrada) :-
-    \+ puedeConectar([A, B], [As, Bs], Cabeza, Siguiente),
-    conectarPrimerEslabon(ListaSinBase, eslabon(A,B), T, Salida, ListaCerrada).
-
-puedeConectar([A, B], List, Cabeza, Siguiente) :-
-    member(A, List),
-    delete(List, A, [Siguiente | _]),
-    B = Cabeza.
-puedeConectar([A, B], List, Cabeza, Siguiente) :-
-    member(B, List),
-    delete(List, B, [Siguiente | _]),
-    A = Cabeza.
-
-buscarListaCerrada(Lista, Cabeza, Siguiente, [eslabon(A, B) | T], Acc, ListaCerrada) :-
-    
+findMin([Elem], Min) :-
+    length(Elem, Min).
+findMin([Elem1, Elem2 | T], Min) :-
+    length(Elem1, L1),
+    length(Elem2, L2),
+    L1 < L2,
+    findMin([Elem1 | T], Min).
+findMin([Elem1, Elem2 | T], Min) :-
+    length(Elem1, L1),
+    length(Elem2, L2),
+    L1 >= L2,
+    findMin([Elem2 | T], Min).
