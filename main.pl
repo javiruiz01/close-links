@@ -23,27 +23,24 @@ iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
     buscar(A, B, ListaSinBase, [eslabon(A, B)], ListaCerrada),
     iniciar(ListaSinRepeticiones, RecorrerResto, ListaCerrada).
 
+buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+    A == B,
+    !,
+    Acc = ListaCerrada.
 buscar(A, B, [], Acc, ListaCerrada) :-
     A == B,
     !,
     Acc = ListaCerrada.
-buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
-    member(B, [As, Bs]),
-    delete([As, Bs], B, [Siguiente | _]),
-    append(Acc, [eslabon(As, Bs)], NewAcc),
-    buscar(A, Siguiente, T, NewAcc, ListaCerrada).
-buscar(B, A, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
-    member(B, [As, Bs]),
-    delete([As, Bs], B, [Siguiente | _]),
-    append(Acc, [eslabon(As, Bs)], NewAcc),
-    buscar(A, Siguiente, T, NewAcc, ListaCerrada).
-buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
-    A == B,
-    !,
-    Acc = ListaCerrada.
-buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
-    \+ member(B, [As, Bs]),
-    buscar(A, B, T, Acc, ListaCerrada).
+buscar(A, B, List, Acc, ListaCerrada) :-
+    member(eslabon(B, X), List),
+    append(Acc, [eslabon(B, X)], NewAcc),
+    delete(List, eslabon(B, X), List2),
+    buscar(A, X, List2, NewAcc, ListaCerrada).
+buscar(A, B, List, Acc, ListaCerrada) :-
+    member(eslabon(X, B), List),
+    append(Acc, [eslabon(X, B)], NewAcc),
+    delete(List, eslabon(X, B), List2),
+    buscar(A, X, List2, NewAcc, ListaCerrada).
 
 cierreMinimo(OriginalList, Min) :-
     findall(X, cierre(OriginalList, X), Result),
