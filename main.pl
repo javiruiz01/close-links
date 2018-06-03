@@ -23,7 +23,7 @@ iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
     buscar(A, B, ListaSinBase, [eslabon(A, B)], ListaCerrada),
     iniciar(ListaSinRepeticiones, RecorrerResto, ListaCerrada).
 
-buscar(A, B, [eslabon(As, Bs) | T], Acc, ListaCerrada) :-
+buscar(A, B, List, Acc, ListaCerrada) :-
     A == B,
     !,
     Acc = ListaCerrada.
