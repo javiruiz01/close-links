@@ -1,7 +1,7 @@
 % Práctica 2: Programación ISO-Prolog
 :-module(_,_).
 
-% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,a)], X).
+% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d, a)], X).
 % Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], X).
 % Ejemplo 3: cierreMinimo([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], Min).
 % Ejemplo 4: cierreMinimo([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Min).
@@ -13,7 +13,8 @@ alumno_prode(calle, ruiz, javier, v130126).
 cierre(ListaSinRepeticiones, ListaCerrada):- %cierre/2
     iniciar(ListaSinRepeticiones, ListaSinRepeticiones, ListaCerrada).
 
-iniciar(_, [], _).
+iniciar(_, [], ListaCerrada) :-
+    ground(ListaCerrada).
 iniciar(_, _, ListaCerrada) :-
     ground(ListaCerrada).
 iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
@@ -22,7 +23,25 @@ iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
     delete(RecorrerLista, eslabon(A,B), RecorrerResto),
     buscar(A, B, ListaSinBase, [eslabon(A, B)], ListaCerrada),
     iniciar(ListaSinRepeticiones, RecorrerResto, ListaCerrada).
+iniciar(ListaSinRepeticiones, RecorrerLista, ListaCerrada) :-
+    member(eslabon(A, B), RecorrerLista),
+    delete(ListaSinRepeticiones, eslabon(A, B), ListaSinBase),
+    delete(RecorrerLista, eslabon(A,B), RecorrerResto),
+    buscar(B, A, ListaSinBase, [eslabon(A, B)], ListaCerrada),
+    iniciar(ListaSinRepeticiones, RecorrerResto, ListaCerrada).
 
+buscar(A, B, List, Acc, ListaCerrada) :-
+    A == B,
+    member(eslabon(B, X), List),
+    append(Acc, [eslabon(B, X)], NewAcc),
+    delete(List, eslabon(B, X), List2),
+    buscar(A, X, List2, NewAcc, ListaCerrada).
+buscar(A, B, List, Acc, ListaCerrada) :-
+    A == B,
+    member(eslabon(X, B), List),
+    append(Acc, [eslabon(X, B)], NewAcc),
+    delete(List, eslabon(X, B), List2),
+    buscar(A, X, List2, NewAcc, ListaCerrada).
 buscar(A, B, List, Acc, ListaCerrada) :-
     A == B,
     !,
