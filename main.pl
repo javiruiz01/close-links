@@ -6,7 +6,7 @@
 % Ejemplo 3: cierreMinimo([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], Min).
 % Ejemplo 4: cierreMinimo([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Min).
 % Ejemplo 5: cierreUnico([eslabon(c,b), eslabon(c,d), eslabon(a,b), eslabon(e,b), eslabon(d,b), eslabon(a,e)], Cierre).
-% Ejemplo 6: cierreUnico([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d, a)], Cierre).
+% Ejemplo 6: cierreUnico([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Cierre).
 
 alumno_prode(lopez, merlin, jaime, t110296).
 alumno_prode(copado, redondo, sergio, t110040).
@@ -82,40 +82,32 @@ findMin([Elem1, Elem2 | T], Min) :-
 
 cierreUnico(OriginalList, Cierre) :-
     findall(X, cierre(OriginalList, X), Result),
-    findUnique(Result, Cierre).
+    findUnique(Result, [], Salida),
+    member(Cierre, Salida).
 
-findUnique([], Cierre).
-findUnique(_, Cierre) :-
-    ground(Cierre).
-findUnique([Elem | T], Cierre) :-
-    recursive(Elem, T, Cierre),
-    findUnique(T, Cierre).
+findUnique([], Acc, Salida):-
+    Acc = Salida.
+findUnique([Elemento | T], Acc, Salida) :-
+    inAcc(Elemento, Acc, Acc, NewAcc),
+    findUnique(T, NewAcc, Salida).
 
-recursive(_, _, Cierre) :-
-    ground(Cierre).
-recursive(Elem, [], Cierre).
-recursive(Elem, [A | T], Cierre):-
-    length(Elem, L1),
-    length(A, L2),
+inAcc(Elemento, [], Acc, Salida) :-
+    append([Elemento], Acc, Salida).
+inAcc(Elemento, [X | T], Acc, Salida) :-
+    is_sublist(Elemento, X).
+inAcc(Elemento, [X | T], Acc, Salida) :-
+    \+ is_sublist(Elemento, X),
+    inAcc(Elemento, T, Acc, Salida).
+
+is_sublist([X], List) :-
+    length([X], L1),
+    length(List, L2),
     L1 == L2,
-    is_sublist(Elem, A),
-    recursive(Elem,  T, Cierre).
-recursive(Elem, [A | T], Cierre):-
-    length(Elem, L1),
-    length(A, L2),
-    L1 == L2,
-    \+ is_sublist(Elem, A),
-    !,
-    Elem = Cierre,
-    recursive(Elem, T, Cierre).
-recursive(Elem, [A | T], Cierre):-
-    length(Elem, L1),
-    length(A, L2),
-    L1 =\= L2,
-    recursive(Elem,  T, Cierre).
-
-is_sublist([], List).
+    member(X, List).
 is_sublist([X | T], List) :-
+    length([X | T], L1),
+    length(List, L2),
+    L1 == L2,
     member(X, List),
     delete(List, X, List1),
     is_sublist(T, List1).
