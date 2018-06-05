@@ -1,12 +1,4 @@
-% Práctica 2: Programación ISO-Prolog
 :-module(_,_).
-
-% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d, a)], X).
-% Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], X).
-% Ejemplo 3: cierreMinimo([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], Min).
-% Ejemplo 4: cierreMinimo([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Min).
-% Ejemplo 5: cierreUnico([eslabon(c,b), eslabon(c,d), eslabon(a,b), eslabon(e,b), eslabon(d,b), eslabon(a,e)], Cierre).
-% Ejemplo 6: cierreUnico([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Cierre).
 
 alumno_prode(lopez, merlin, jaime, t110296).
 alumno_prode(copado, redondo, sergio, t110040).
@@ -82,19 +74,20 @@ findMin([Elem1, Elem2 | T], Min) :-
 
 cierreUnico(OriginalList, Cierre) :-
     findall(X, cierre(OriginalList, X), Result),
-    findUnique(Result, [], Salida),
-    member(Cierre, Salida).
+    findUnique(Result, [], FinalAcc),
+    member(Cierre, FinalAcc).
 
-findUnique([], Acc, Salida):-
-    Acc = Salida.
-findUnique([Elemento | T], Acc, Salida) :-
+findUnique([], Acc, FinalAcc):-
+    Acc = FinalAcc.
+findUnique([Elemento | T], Acc, FinalAcc) :-
     inAcc(Elemento, Acc, Acc, NewAcc),
-    findUnique(T, NewAcc, Salida).
+    findUnique(T, NewAcc, FinalAcc).
 
 inAcc(Elemento, [], Acc, Salida) :-
     append([Elemento], Acc, Salida).
-inAcc(Elemento, [X | T], Acc, Salida) :-
-    is_sublist(Elemento, X).
+inAcc(Elemento, [X | T], Acc, NewAcc) :-
+    is_sublist(Elemento, X),
+    Acc = NewAcc.
 inAcc(Elemento, [X | T], Acc, Salida) :-
     \+ is_sublist(Elemento, X),
     inAcc(Elemento, T, Acc, Salida).
@@ -111,3 +104,10 @@ is_sublist([X | T], List) :-
     member(X, List),
     delete(List, X, List1),
     is_sublist(T, List1).
+
+% Ejemplo 1: cierre([eslabon(a,b), eslabon(b,c), eslabon(c,d), eslabon(d, a)], X).
+% Ejemplo 2: cierre([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], X).
+% Ejemplo 3: cierreMinimo([eslabon(c, b), eslabon(c, d), eslabon(a, b), eslabon(e, b), eslabon(d, b), eslabon(a, e)], Min).
+% Ejemplo 4: cierreMinimo([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Min).
+% Ejemplo 5: cierreUnico([eslabon(c,b), eslabon(c,d), eslabon(a,b), eslabon(e,b), eslabon(d,b), eslabon(a,e)], Cierre).
+% Ejemplo 6: cierreUnico([eslabon(a,b), eslabon(b,c), eslabon(c,a)], Cierre).
